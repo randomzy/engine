@@ -6,20 +6,21 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include <initializer_list>
 
 class Program
 {
 public:
-    Program(const std::vector<Shader> shaders)
+    Program(std::initializer_list<Shader> shaders)
     {
         m_program = glCreateProgram();
 
-        for (auto shader : shaders)
+        for (auto const & shader : shaders)
             glAttachShader(m_program, shader.getHandle());
 
         glLinkProgram(m_program);
 
-        for (auto shader : shaders)
+        for (auto const & shader : shaders)
             glDetachShader(m_program, shader.getHandle());
 
         GLint is_linked = 0;

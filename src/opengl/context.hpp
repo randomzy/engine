@@ -3,10 +3,11 @@
 
 #include "opengl.hpp"
 #include <string>
+#include <iostream>
 
 // handle errors
 inline void GLAPIENTRY
-MessageCallback( GLenum source,
+glMessageCallback( GLenum source,
                  GLenum type,
                  GLuint id,
                  GLenum severity,
@@ -22,28 +23,21 @@ MessageCallback( GLenum source,
 class Context
 {
 public:
-    Context(int width, int height, std::string const & windowName)
+    Context(GLFWwindow * window)
+        : m_window(window)
     {
-        if (GLFW_FALSE == glfwInit()) {
-            throw gl_error("Could not initialize GLFW");
-        }
-
-        /* Create a windowed mode window and its OpenGL context */
-        m_window = glfwCreateWindow(640, 480, windowName.c_str(), NULL, NULL);
-        if (!m_window) {
-            glfwTerminate();
-            throw gl_error("Could not initialize window");
-        }
-
         glfwMakeContextCurrent(m_window);
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
             throw gl_error("Could not load glad");
         }
-    }
-    ~Context()
-    {
-        glfwTerminate();
+
+        glEnable(GL_DEBUG_OUTPUT);
+        glDebugMessageCallback(glMessageCallback, 0);
+
+        std::cout << "Vendor: " << glGetString(GL_VENDOR) << std::endl;
+        std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
+        std::cout << "Version: " << glGetString(GL_VERSION) << std::endl;
     }
 
     void swapBuffers()
