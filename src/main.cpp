@@ -10,6 +10,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "mouseEvents.hpp"
+#include "vertexArray.hpp"
 
 template<typename T>
 T linear_map(T const & in, T const & in_low, T const & in_high, T const & out_low, T const & out_high)
@@ -34,19 +35,14 @@ int main(void)
      0.5f, -0.5f, 0.0f,
      0.0f,  0.5f, 0.0f
     };
+    DataLayout dataLayout({
+        AttribElement(0, GLSLDatatype::Vec3, true, 0, 3)
+    });
+    VertexBuffer vb(dataLayout, vertices, sizeof(vertices)/sizeof(vertices[0]));
 
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    VertexArray va;
+    va.addVertexBuffer(vb);
 
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
-    glEnableVertexAttribArray(0);
-    
     program.use();
 
     float theta = glm::radians(0.f);
