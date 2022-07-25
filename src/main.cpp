@@ -10,6 +10,7 @@
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "mouseEvents.hpp"
+#include "vertexArray.hpp"
 
 template<typename T>
 T linear_map(T const & in, T const & in_low, T const & in_high, T const & out_low, T const & out_high)
@@ -34,19 +35,19 @@ int main(void)
      0.5f, -0.5f, 0.0f,
      0.0f,  0.5f, 0.0f
     };
+    std::array<IndexBuffer::index_type, 3> indices = {0,1,2};
 
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
+    auto vao = VertexArray::create();
 
-    GLuint vbo;
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    DataLayout layout({
+        AttribElement("aPos", 0, GLSLDatatype::Vec3, false, 3*sizeof(float), 0)
+    });
+    auto vbo = VertexBuffer::create(layout, vertices, sizeof(vertices));
+    vao->addVertexBuffer(vbo);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
-    glEnableVertexAttribArray(0);
-    
+    auto ibo = IndexBuffer::create(indices.data(), indices.size());
+    vao->setIndexBuffer(ibo);
+
     program.use();
 
     float theta = glm::radians(0.f);
@@ -97,7 +98,10 @@ int main(void)
 
         glClearColor(0,0,0,1);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        {
+            vao->bind();
+            glDrawElements(GL_TRIANGLES, indices.size(), IndexBuffer::gl_type, 0);
+        }
 
         window.update();
     }
